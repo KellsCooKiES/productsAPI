@@ -23,4 +23,5 @@ Route::get('/{categoryId}/products', 'api\ProductController@indexByCategory');
 Route::get('/products/{id}', 'api\ProductController@show');
 Route::post('/products', 'api\ProductController@store');
 Route::resource('products', 'api\ProductController');
+Route::resource('categories', 'api\CategoryController');
 

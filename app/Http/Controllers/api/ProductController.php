@@ -120,8 +120,6 @@ class ProductController extends BaseController
            $product->categories()->attach($categoriesId);
        }
 
-       $product->save();
-
        return $this->sendResponse($product->id,'success');
 
 
