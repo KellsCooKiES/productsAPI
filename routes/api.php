@@ -17,4 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::get('/{categoryId}/products', 'api\ProductController@indexByCategory');
+Route::get('/products/{id}', 'api\ProductController@show');
+Route::post('/products', 'api\ProductController@store');
 Route::resource('products', 'api\ProductController');
+

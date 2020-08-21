@@ -31,7 +31,6 @@ $factory->define(Product::class, function (Faker $faker) {
     return [
         'name' => $faker->word,
         'description'=> $faker->sentence,
-        'category_id' => 1,
         'price'=> 12.00,
         'quantity'=> $faker->randomNumber(),
         'external_id'=>$faker->numberBetween()
@@ -41,7 +40,7 @@ $factory->define(\App\Category::class, function (Faker $faker) {
     return [
         'name' => $faker->word,
         'parent_id' => $faker->numberBetween(0,1000),
-        'external_id'=>$faker->numberBetween()
+        'external_id'=>$faker->numberBetween(1,20000)
     ];
 });
 

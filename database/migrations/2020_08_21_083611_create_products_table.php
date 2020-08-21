@@ -19,7 +19,6 @@ class CreateProductsTable extends Migration
             $table->string('description')->nullable();
             $table->decimal('price',19,4);
             $table->unsignedBigInteger('quantity');
-            $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('external_id')->unique();
             $table->timestamps();
         });
