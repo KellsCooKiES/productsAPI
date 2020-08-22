@@ -35,7 +35,7 @@ class CategoryController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:200',
-            'external_id'=> 'unique:categories|required',
+            'external_id'=> 'unique:categories|required|integer',
             'parent_id' => 'integer'
         ]);
 
@@ -69,7 +69,7 @@ class CategoryController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:200',
-            'external_id'=> 'unique:categories|required',
+            'external_id'=> 'unique:categories|required|integer',
             'parent_id' => 'integer'
         ]);
 
@@ -98,5 +98,54 @@ class CategoryController extends BaseController
         $category->delete();
 
         return $this->sendResponse('Category id: '.$id,'successfully deleted');
+    }
+
+    /**
+     * @param $categories
+     * @return bool
+     */
+    public static function addCategoriesConsole($categories)
+    {
+         foreach ( $categories as $categoryData){
+
+             $oldCategory = Category::where('external_id', '=', $categoryData['external_id'])->first();
+             //check if exists
+             if ($oldCategory === null) {
+
+                //   if not exists save
+                 $validator = Validator::make($categoryData, [
+                     'name' => 'required|max:200',
+                     'external_id' => 'unique:categories|required|integer',
+                 ]);
+
+                 if ($validator->fails()) {
+                      return $validator->errors()->first();
+
+                 }
+
+                 $category = new Category([
+                     'name' => $categoryData['name'],
+                     'external_id' => $categoryData['external_id'],
+                 ]);
+
+                 $category->save();
+             } else {
+
+                 //else update
+                 $validator = Validator::make($categoryData, [
+                     'name' => 'required|max:200',
+                     'external_id' => 'integer|required',
+                 ]);
+                 if ($validator->fails()) {
+                     return $validator->errors()->first();
+                 }
+
+                 $oldCategory->update([
+                     'name' => $categoryData['name'],
+                     'external_id' => $categoryData['external_id'],
+                 ]);
+             }
+         }
+        return true;
     }
 }

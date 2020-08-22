@@ -69,7 +69,7 @@ class ProductController extends BaseController
             return $this->sendError('Products or category not found.');
         }
 
-        return $this->sendResponse($products->toArray(),'success');
+        return $this->sendResponse($products->toArray(),'Products by category');
 
     }
 
@@ -95,10 +95,10 @@ class ProductController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:200',
-            'description' => 'required|max:1000',
+            'description' => 'max:1000',
             'price' => 'required|numeric',
             'quantity' => 'required|integer',
-            'external_id'=> 'unique:products|required',
+            'external_id'=> 'unique:products|required|integer',
             'category_id' => 'array|required'
         ]);
 
@@ -120,7 +120,7 @@ class ProductController extends BaseController
            $product->categories()->attach($categoriesId);
        }
 
-       return $this->sendResponse($product->id,'success');
+       return $this->sendResponse($product->id,'Product was successfully saved');
 
 
     }
@@ -131,29 +131,6 @@ class ProductController extends BaseController
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Product $product)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.
@@ -168,5 +145,69 @@ class ProductController extends BaseController
         if($product->delete()){
             return $this->sendResponse( 'Product id: '.$id,'Product was deleted');
         }
+    }
+
+    public static function addProductsConsole($products)
+    {
+        foreach ($products as $productData) {
+
+            $oldProduct = Product::where('external_id', '=', $productData['external_id'])->first();
+            //check if exists
+            if ($oldProduct === null) {
+
+                //if not save
+                $validator = Validator::make($productData, [
+                    'name' => 'required|max:200',
+                    'price' => 'required|numeric',
+                    'quantity' => 'required|integer',
+                    'external_id' => 'integer|unique:products|required',
+                    'category_id' => 'array|required'
+                ]);
+
+                if ($validator->fails()) {
+                    return $validator->errors()->first();
+                }
+
+                $product = new Product([
+                    'name' => $productData['name'],
+                    'price' => $productData['price'],
+                    'quantity' => $productData['quantity'],
+                    'external_id' => $productData['external_id'],
+                ]);
+
+                //save and attach product with categories
+                $categoriesId = $productData['category_id'];
+                if ($product->save()) {
+                    $product->categories()->attach($categoriesId);
+                }
+            } else {
+
+                //else update and sync
+                $validator = Validator::make($productData, [
+                    'name' => 'required|max:200',
+                    'price' => 'required|numeric',
+                    'quantity' => 'required|integer',
+                    'external_id' => 'integer|required',
+                    'category_id' => 'array|required'
+                ]);
+                if ($validator->fails()) {
+                    return $validator->errors()->first();
+                }
+
+                $response = $oldProduct->update([
+                    'name' => $productData['name'],
+                    'price' => $productData['price'],
+                    'quantity' => $productData['quantity'],
+                    'external_id' => $productData['external_id'],
+                ]);
+
+                $categoriesId = $productData['category_id'];
+                if ($response) {
+                    $oldProduct->categories()->sync($categoriesId);
+                }
+            }
+
+        }
+        return true;
     }
 }
