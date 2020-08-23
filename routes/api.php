@@ -18,10 +18,21 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::group(['middleware' => ['cors', 'json.response']], function () {
+    //public routs
+    Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
+    Route::post('/register','Auth\ApiAuthController@register')->name('register.api');
 
-Route::get('/{categoryId}/products', 'api\ProductController@indexByCategory');
-Route::get('/products/{id}', 'api\ProductController@show');
-Route::post('/products', 'api\ProductController@store');
-Route::resource('products', 'api\ProductController');
-Route::resource('categories', 'api\CategoryController');
+});
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/{categoryId}/products', 'api\ProductController@indexByCategory');
+    Route::get('/products/{id}', 'api\ProductController@show');
+    Route::post('/products', 'api\ProductController@store');
+    Route::resource('products', 'api\ProductController');
+    Route::resource('categories', 'api\CategoryController');
+    Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
+
+});
+
 
